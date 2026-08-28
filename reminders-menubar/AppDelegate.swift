@@ -69,6 +69,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         stopOutsideClickMonitors()
     }
 
+    // Prevent the app from terminating because of the Settings window (or any auxiliary window).
+    // As a menu bar app with no main window, the popover serves as its primary UI.
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+        false
+    }
+
     private func configurePopover() {
         setMainPopoverSize(size: UserPreferences.shared.mainPopoverSize)
         popover.animates = false
