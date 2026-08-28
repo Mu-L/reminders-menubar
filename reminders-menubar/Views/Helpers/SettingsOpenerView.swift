@@ -2,8 +2,74 @@ import Combine
 import SwiftUI
 
 @available(macOS 14.0, *)
+@MainActor
+final class SettingsOpenerBridge {
+    private enum State {
+        case listenerUnavailable
+        case reopening
+        case awaitingListener
+        case listenerReady
+    }
+
+    static let shared = SettingsOpenerBridge()
+
+    private var state = State.listenerUnavailable
+
+    private init() {}
+
+    func requestOpen() {
+        switch state {
+        case .listenerReady:
+            postRequest()
+            return
+        case .reopening:
+            return
+        case .listenerUnavailable, .awaitingListener:
+            state = .reopening
+            reopenApplication()
+        }
+    }
+
+    func listenerDidAppear() {
+        let shouldOpenSettings = state == .reopening || state == .awaitingListener
+        state = .listenerReady
+
+        if shouldOpenSettings {
+            DispatchQueue.main.async { [weak self] in
+                self?.postRequest()
+            }
+        }
+    }
+
+    func listenerDidDisappear() {
+        state = .listenerUnavailable
+    }
+
+    private func reopenApplication() {
+        let configuration = NSWorkspace.OpenConfiguration()
+        configuration.activates = false
+
+        NSWorkspace.shared.openApplication(
+            at: Bundle.main.bundleURL,
+            configuration: configuration,
+            completionHandler: { [weak self] _, error in
+                Task { @MainActor in
+                    guard let self, self.state == .reopening else { return }
+                    self.state = error == nil ? .awaitingListener : .listenerUnavailable
+                }
+            }
+        )
+    }
+
+    private func postRequest() {
+        NotificationCenter.default.post(name: .openSettingsRequest, object: nil)
+    }
+}
+
+@available(macOS 14.0, *)
 struct SettingsOpenerView: View {
     @Environment(\.openSettings) private var openSettings
+    @State private var isOpeningSettings = false
     @State private var settingsOpenCancellable: AnyCancellable?
     @State private var settingsCloseCancellable: AnyCancellable?
     @State private var settingsWindow: NSWindow?
@@ -12,6 +78,12 @@ struct SettingsOpenerView: View {
         SettingsOpenerHiddenWindow()
             .frame(width: 0, height: 0)
             .allowsHitTesting(false)
+            .onAppear {
+                SettingsOpenerBridge.shared.listenerDidAppear()
+            }
+            .onDisappear {
+                SettingsOpenerBridge.shared.listenerDidDisappear()
+            }
             .onReceive(NotificationCenter.default.publisher(for: .openSettingsRequest)) { _ in
                 Task { @MainActor in
                     await handleOpenSettingsRequest()
@@ -26,6 +98,10 @@ struct SettingsOpenerView: View {
             existingWindow.orderFrontRegardless()
             return
         }
+
+        guard !isOpeningSettings else { return }
+        isOpeningSettings = true
+        defer { isOpeningSettings = false }
 
         // Clear any stale reference from a previous session.
         settingsWindow = nil

@@ -12,8 +12,8 @@ extension NSApplication {
         AppDelegate.shared.popover.performClose(nil)
 
         if #available(macOS 14.0, *) {
-            // Note: Post a notification that the hidden helper view (SettingsOpenerView) will pick up.
-            NotificationCenter.default.post(name: .openSettingsRequest, object: nil)
+            // Note: Request to post a notification that the hidden helper view (SettingsOpenerView) will pick up.
+            SettingsOpenerBridge.shared.requestOpen()
         } else if #available(macOS 13.0, *) {
             sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
             activate(ignoringOtherApps: true)
