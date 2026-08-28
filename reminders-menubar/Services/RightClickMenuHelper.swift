@@ -14,14 +14,6 @@ final class RightClickMenuHelper: NSObject {
         let menu = NSMenu()
 
         menu.addItem(makeMenuItem(
-            title: rmbLocalized(.launchAtLoginOption),
-            action: #selector(toggleLaunchAtLogin),
-            state: UserPreferences.shared.launchAtLoginIsEnabled ? .on : .off
-        ))
-
-        menu.addItem(.separator())
-
-        menu.addItem(makeMenuItem(
             title: rmbLocalized(.reloadRemindersDataButton),
             action: #selector(reloadData),
             systemSymbolName: "arrow.clockwise"
@@ -84,10 +76,6 @@ final class RightClickMenuHelper: NSObject {
     }
 
     // MARK: - Actions
-
-    @objc private func toggleLaunchAtLogin() {
-        UserPreferences.shared.launchAtLoginIsEnabled.toggle()
-    }
 
     @objc private func reloadData() {
         NotificationCenter.default.post(name: .remindersDataShouldUpdate, object: nil)
