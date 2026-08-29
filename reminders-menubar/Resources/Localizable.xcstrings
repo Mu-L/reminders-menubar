@@ -9626,6 +9626,381 @@
         }
       }
     },
+    "launchAtLoginApprovalRequiredNote" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Než se aplikace bude moci spouštět při přihlášení, je nutné ji schválit v Nastavení systému."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bevor die App bei der Anmeldung gestartet werden kann, ist eine Genehmigung in den Systemeinstellungen erforderlich."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Approval is required in System Settings before the app can launch at login."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se requiere aprobación en Configuración del Sistema antes de que la app pueda iniciarse al iniciar sesión."
+          }
+        },
+        "fil-PH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kailangan ng pag-apruba sa Mga Setting ng System bago mabuksan ang app kapag nag-log in."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une autorisation dans Réglages Système est requise pour que l’app puisse se lancer à l’ouverture de session."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Persetujuan diperlukan di Pengaturan Sistem agar app dapat diluncurkan saat masuk."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "È richiesta l’approvazione in Impostazioni di Sistema prima che l’app possa avviarsi al login."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ログイン時にアプリを起動するには、システム設定での承認が必要です。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "로그인 시 앱을 실행하려면 시스템 설정에서 승인이 필요합니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Goedkeuring in Systeeminstellingen is vereist voordat de app bij het inloggen kan worden gestart."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aby aplikacja mogła uruchamiać się po zalogowaniu, wymagane jest zatwierdzenie w Ustawieniach systemowych."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "É necessário aprovar nos Ajustes do Sistema para que o app possa iniciar no login."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чтобы приложение запускалось при входе, необходимо разрешить это в Системных настройках."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pred spustením aplikácie pri prihlásení je potrebné schválenie v Systémových nastaveniach."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uygulamanın oturum açıldığında başlatılabilmesi için Sistem Ayarları’nda onay gerekir."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Щоб програма запускалася під час входу, її потрібно схвалити в Системних параметрах."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cần phê duyệt trong Cài đặt hệ thống trước khi ứng dụng có thể chạy khi đăng nhập."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "需要先在“系统设置”中批准，应用才能在登录时启动。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "需要先在「系統設定」中核准，App 才能在登入時啟動。"
+          }
+        }
+      }
+    },
+    "launchAtLoginUnavailableNote" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Přihlašovací položku aplikace se nepodařilo najít. Obvykle to znamená, že aplikace nebyla správně nainstalována nebo není ve složce Aplikace."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Anmeldeobjekt der App wurde nicht gefunden. Dies bedeutet normalerweise, dass die App nicht korrekt installiert wurde oder sich nicht im Ordner „Programme“ befindet."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The app's login item couldn’t be found. This usually means the app wasn’t installed correctly or is not in the Applications folder."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se encontró el ítem de inicio de sesión de la app. Por lo general, esto significa que la app no se instaló correctamente o no está en la carpeta Aplicaciones."
+          }
+        },
+        "fil-PH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hindi mahanap ang login item ng app. Karaniwan itong nangangahulugang hindi na-install nang tama ang app o wala ito sa folder na Applications."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’élément d’ouverture de l’app est introuvable. Cela signifie généralement que l’app n’a pas été installée correctement ou qu’elle ne se trouve pas dans le dossier Applications."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Item masuk app tidak dapat ditemukan. Hal ini biasanya berarti app tidak diinstal dengan benar atau tidak berada di folder Aplikasi."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’elemento di login dell’app non è stato trovato. Di solito significa che l’app non è stata installata correttamente o non si trova nella cartella Applicazioni."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリのログイン項目が見つかりませんでした。通常、アプリが正しくインストールされていないか、「アプリケーション」フォルダにないことを意味します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "앱의 로그인 항목을 찾을 수 없습니다. 일반적으로 앱이 올바르게 설치되지 않았거나 응용 프로그램 폴더에 없음을 의미합니다."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Het inlogonderdeel van de app is niet gevonden. Dit betekent meestal dat de app niet correct is geïnstalleerd of niet in de map Programma’s staat."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nie znaleziono elementu logowania aplikacji. Zwykle oznacza to, że aplikacja nie została poprawnie zainstalowana lub nie znajduje się w folderze Aplikacje."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O item de início de sessão do app não foi encontrado. Isso geralmente significa que o app não foi instalado corretamente ou não está na pasta Aplicativos."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Объект входа приложения не найден. Обычно это означает, что приложение установлено неправильно или находится не в папке «Программы»."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prihlasovacia položka aplikácie sa nenašla. Zvyčajne to znamená, že aplikácia nebola správne nainštalovaná alebo nie je v priečinku Aplikácie."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uygulamanın giriş öğesi bulunamadı. Bu genellikle uygulamanın doğru yüklenmediği veya Uygulamalar klasöründe olmadığı anlamına gelir."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Об’єкт входу програми не знайдено. Зазвичай це означає, що програму встановлено неправильно або вона розташована не в папці «Програми»."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Không tìm thấy mục đăng nhập của ứng dụng. Điều này thường có nghĩa là ứng dụng chưa được cài đặt đúng cách hoặc không nằm trong thư mục Ứng dụng."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "找不到应用的登录项。这通常表示应用未正确安装，或不在“应用程序”文件夹中。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "找不到 App 的登入項目。這通常表示 App 未正確安裝，或不在「應用程式」檔案夾中。"
+          }
+        }
+      }
+    },
+    "openLoginItemsSettingsButton" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otevřít nastavení přihlašovacích položek"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einstellungen für Anmeldeobjekte öffnen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open login items settings"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir la configuración de ítems de inicio"
+          }
+        },
+        "fil-PH" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buksan ang mga setting ng login item"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvrir les réglages des éléments d’ouverture"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buka pengaturan item masuk"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apri le impostazioni degli elementi di login"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ログイン項目の設定を開く"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "로그인 항목 설정 열기"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instellingen voor inlogonderdelen openen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otwórz ustawienia elementów logowania"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir ajustes de itens de início de sessão"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открыть настройки объектов входа"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otvoriť nastavenia prihlasovacích položiek"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Giriş öğeleri ayarlarını aç"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відкрити параметри об’єктів входу"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mở cài đặt mục đăng nhập"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打开登录项设置"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打開登入項目設定"
+          }
+        }
+      }
+    },
     "menuBarCounterSettingsLabel" : {
       "extractionState" : "manual",
       "localizations" : {

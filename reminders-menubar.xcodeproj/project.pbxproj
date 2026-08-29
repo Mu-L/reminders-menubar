@@ -101,6 +101,7 @@
 		71D2624B2F592E2A0073C0FD /* SettingsDivider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71D2624A2F592E2A0073C0FD /* SettingsDivider.swift */; };
 		71D2624B2F592E2B0073C0FD /* SettingsNoteStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71D2624A2F592E2B0073C0FD /* SettingsNoteStyle.swift */; };
 		71D2624D2F5A1B0000C8A33E /* RightClickMenuHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71D2624C2F5A1B0000C8A33E /* RightClickMenuHelper.swift */; };
+		71D2624D2F5A1B0200C8A33E /* LaunchAtLoginService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71D2624C2F5A1B0200C8A33E /* LaunchAtLoginService.swift */; };
 		71D2624F2F5A1B0100C8A33E /* SettingsOpenerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71D2624E2F5A1B0100C8A33E /* SettingsOpenerView.swift */; };
 		71D262502F5B8A0000C8A33E /* CopySettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71D262512F5B8A0000C8A33E /* CopySettingsTab.swift */; };
 		71D6B98028E25B9F0004EEBB /* AppCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71D6B97F28E25B9F0004EEBB /* AppCommands.swift */; };
@@ -250,6 +251,7 @@
 		71D2624A2F592E2A0073C0FD /* SettingsDivider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsDivider.swift; sourceTree = "<group>"; };
 		71D2624A2F592E2B0073C0FD /* SettingsNoteStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsNoteStyle.swift; sourceTree = "<group>"; };
 		71D2624C2F5A1B0000C8A33E /* RightClickMenuHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RightClickMenuHelper.swift; sourceTree = "<group>"; };
+		71D2624C2F5A1B0200C8A33E /* LaunchAtLoginService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAtLoginService.swift; sourceTree = "<group>"; };
 		71D2624E2F5A1B0100C8A33E /* SettingsOpenerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsOpenerView.swift; sourceTree = "<group>"; };
 		71D262512F5B8A0000C8A33E /* CopySettingsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopySettingsTab.swift; sourceTree = "<group>"; };
 		71D6B97F28E25B9F0004EEBB /* AppCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCommands.swift; sourceTree = "<group>"; };
@@ -360,6 +362,7 @@
 				71CC00032FA6000300000002 /* SettingsCoordinator.swift */,
 				7115461824C0C280007781E2 /* RemindersService.swift */,
 				71F301F9259FB5CF00CDD81E /* UserPreferences.swift */,
+				71D2624C2F5A1B0200C8A33E /* LaunchAtLoginService.swift */,
 				715B4DD428D56FE5008C6683 /* KeyboardShortcutService.swift */,
 				71D2624C2F5A1B0000C8A33E /* RightClickMenuHelper.swift */,
 				71C0D001E1700001A8000001 /* MenuBarPreviewService.swift */,
@@ -853,6 +856,7 @@
 				71D2624F2F5A1B0100C8A33E /* SettingsOpenerView.swift in Sources */,
 				71217BA82F8C8BEB00E5FEB4 /* AppStoreUpdateController.swift in Sources */,
 				71F301FA259FB5CF00CDD81E /* UserPreferences.swift in Sources */,
+				71D2624D2F5A1B0200C8A33E /* LaunchAtLoginService.swift in Sources */,
 				716CAFF02AC28E5500EEB1DB /* ReminderItem.swift in Sources */,
 				71B0CA022FA4000100000C01 /* CopyProperty.swift in Sources */,
 				71D2623C2F57935F0073C0FD /* SettingsView.swift in Sources */,

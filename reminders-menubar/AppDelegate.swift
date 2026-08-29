@@ -57,6 +57,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         AppDelegate.shared = self
+        LaunchAtLoginService.shared.migrateIfNeeded()
 
         configurePopover()
         configureMenuBarButton()

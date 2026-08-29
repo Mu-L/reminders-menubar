@@ -2,14 +2,21 @@ import SwiftUI
 
 struct GeneralSettingsTab: View {
     @ObservedObject var userPreferences = UserPreferences.shared
+    @ObservedObject private var launchAtLoginService = LaunchAtLoginService.shared
 
     var body: some View {
         Form {
             SettingsSection {
                 Toggle(
                     rmbLocalized(.launchAtLoginOption),
-                    isOn: $userPreferences.launchAtLoginIsEnabled
+                    isOn: Binding(
+                        get: { launchAtLoginService.isEnabled },
+                        set: { launchAtLoginService.setEnabled($0) }
+                    )
                 )
+                .disabled(launchAtLoginService.status == .unavailable)
+
+                launchAtLoginStatusNote
             }
 
             SettingsDivider()
@@ -76,6 +83,31 @@ struct GeneralSettingsTab: View {
             }
         }
         .padding(20)
+        .onAppear {
+            launchAtLoginService.refresh()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            launchAtLoginService.refresh()
+        }
+    }
+
+    @ViewBuilder private var launchAtLoginStatusNote: some View {
+        switch launchAtLoginService.status {
+        case .requiresApproval:
+            Text(rmbLocalized(.launchAtLoginApprovalRequiredNote))
+                .modifier(SettingsNoteStyle())
+
+            if #available(macOS 13.0, *) {
+                Button(rmbLocalized(.openLoginItemsSettingsButton)) {
+                    launchAtLoginService.openSystemSettings()
+                }
+            }
+        case .unavailable:
+            Text(rmbLocalized(.launchAtLoginUnavailableNote))
+                .modifier(SettingsNoteStyle())
+        case .enabled, .disabled:
+            EmptyView()
+        }
     }
 }
 

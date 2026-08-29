@@ -46,6 +46,9 @@ enum RemindersMenuBarLocalizedKeys: String {
     case recentRemindersLoadingMessage
     case updateAvailableNoticeButton
     case launchAtLoginOption
+    case launchAtLoginApprovalRequiredNote
+    case launchAtLoginUnavailableNote
+    case openLoginItemsSettingsButton
     case appAppearanceReduceTransparencyOption
     case appColorSchemeSettingsLabel
     case appAppearanceColorSystemModeOption
