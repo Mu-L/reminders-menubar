@@ -171,7 +171,7 @@ struct RmbHighlightedTextField: NSViewRepresentable {
         var parent: RmbHighlightedTextField
 
         var isAutoCompleting = false
-        var isDeletePressed = false
+        var isDeletingText = false
         var lastFocusTrigger: UUID?
 
         init(_ parent: RmbHighlightedTextField) {
@@ -182,10 +182,6 @@ struct RmbHighlightedTextField: NSViewRepresentable {
 
         func textView(_ textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
             switch commandSelector {
-            case #selector(NSResponder.deleteBackward(_:)),
-                 #selector(NSResponder.deleteForward(_:)):
-                isDeletePressed = true
-                return false
             case #selector(NSResponder.insertNewline(_:)):
                 return handleNewline()
             default:
@@ -218,6 +214,8 @@ struct RmbHighlightedTextField: NSViewRepresentable {
                 return true
             }
 
+            isDeletingText = replacementString.isEmpty && affectedCharRange.length > 0
+
             if !parent.allowNewLineAndTab && (replacementString == "\n" || replacementString == "\t") {
                 return false
             }
@@ -237,8 +235,8 @@ struct RmbHighlightedTextField: NSViewRepresentable {
                 parent.text.wrappedValue = textView.string
             }
 
-            if isDeletePressed {
-                isDeletePressed = false
+            if isDeletingText {
+                isDeletingText = false
                 return
             }
 
