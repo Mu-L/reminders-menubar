@@ -91,6 +91,7 @@
 		71CC00022FA6000200000001 /* CopyShortcutCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71CC00012FA6000100000001 /* CopyShortcutCoordinator.swift */; };
 		71CC00042FA6000400000002 /* SettingsCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71CC00032FA6000300000002 /* SettingsCoordinator.swift */; };
 		71CCF9842D43148100D334F8 /* EKReminderPriority+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71CCF9832D43148000D334F8 /* EKReminderPriority+Extensions.swift */; };
+		71CE00022FA6000200000001 /* NewReminderTypingCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71CE00012FA6000100000001 /* NewReminderTypingCoordinator.swift */; };
 		71D2623C2F57935F0073C0FD /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71D2623B2F57935F0073C0FD /* SettingsView.swift */; };
 		71D2623F2F57D4490073C0FD /* SettingsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71D2623E2F57D4490073C0FD /* SettingsSection.swift */; };
 		71D262412F57D4E60073C0FD /* GeneralSettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71D262402F57D4E60073C0FD /* GeneralSettingsTab.swift */; };
@@ -241,6 +242,7 @@
 		71CC00012FA6000100000001 /* CopyShortcutCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopyShortcutCoordinator.swift; sourceTree = "<group>"; };
 		71CC00032FA6000300000002 /* SettingsCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsCoordinator.swift; sourceTree = "<group>"; };
 		71CCF9832D43148000D334F8 /* EKReminderPriority+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EKReminderPriority+Extensions.swift"; sourceTree = "<group>"; };
+		71CE00012FA6000100000001 /* NewReminderTypingCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewReminderTypingCoordinator.swift; sourceTree = "<group>"; };
 		71D2623B2F57935F0073C0FD /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		71D2623E2F57D4490073C0FD /* SettingsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsSection.swift; sourceTree = "<group>"; };
 		71D262402F57D4E60073C0FD /* GeneralSettingsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsTab.swift; sourceTree = "<group>"; };
@@ -359,6 +361,7 @@
 				71F2AF662FB190EA00C59519 /* Parsers */,
 				B55D54F72F37DF4E002DE761 /* ReminderCopyService.swift */,
 				71CC00012FA6000100000001 /* CopyShortcutCoordinator.swift */,
+				71CE00012FA6000100000001 /* NewReminderTypingCoordinator.swift */,
 				71CC00032FA6000300000002 /* SettingsCoordinator.swift */,
 				7115461824C0C280007781E2 /* RemindersService.swift */,
 				71F301F9259FB5CF00CDD81E /* UserPreferences.swift */,
@@ -841,6 +844,7 @@
 				716F69F42D6421170080A5F1 /* ReminderChangeDueDateOptionMenu.swift in Sources */,
 				B55D54F82F37DF4E002DE761 /* ReminderCopyService.swift in Sources */,
 				71CC00022FA6000200000001 /* CopyShortcutCoordinator.swift in Sources */,
+				71CE00022FA6000200000001 /* NewReminderTypingCoordinator.swift in Sources */,
 				71CC00042FA6000400000002 /* SettingsCoordinator.swift in Sources */,
 				7115461324C0ADCB007781E2 /* ReminderItemView.swift in Sources */,
 				71F93A652E03B93100D5C5BC /* ReminderExternalLinksView.swift in Sources */,

@@ -3,6 +3,7 @@ import EventKit
 
 struct ContentView: View {
     @EnvironmentObject var remindersData: RemindersData
+    @EnvironmentObject var newReminderTypingCoordinator: NewReminderTypingCoordinator
     @ObservedObject var userPreferences = UserPreferences.shared
     @State private var appHasPopoverOpen = false
     @State private var keyMonitor: Any?
@@ -49,7 +50,7 @@ struct ContentView: View {
             guard !appHasPopoverOpen else { return event }
             guard !FilterPanelController.shared.isVisible else { return event }
 
-            if handlePrintableKey(event, popoverWindow: popoverWindow) {
+            if handleNewReminderTyping(event, popoverWindow: popoverWindow) {
                 return nil
             }
             if handleEscapeKey(event, popoverWindow: popoverWindow) {
@@ -62,21 +63,26 @@ struct ContentView: View {
     private func activePopoverWindow(for event: NSEvent) -> NSWindow? {
         let popover = AppDelegate.shared.popover
         guard popover.isShown,
-              let window = popover.contentViewController?.view.window,
-              event.window === window else {
+              let window = popover.contentViewController?.view.window else {
             return nil
         }
+
+        let isMainPopoverEvent = event.window === window
+        let isNewReminderSheetEvent = newReminderTypingCoordinator.isHandoffActive
+            && event.window === window.attachedSheet
+        guard isMainPopoverEvent || isNewReminderSheetEvent else { return nil }
+
         return window
     }
 
-    private func handlePrintableKey(_ event: NSEvent, popoverWindow: NSWindow) -> Bool {
+    private func handleNewReminderTyping(_ event: NSEvent, popoverWindow: NSWindow) -> Bool {
         guard !remindersData.showingSearch,
               !remindersData.availableCalendars.isEmpty,
-              popoverWindow.attachedSheet == nil || remindersData.pendingNewReminderTitle != nil,
-              let typedText = printableText(from: event) else {
+              popoverWindow.attachedSheet == nil || newReminderTypingCoordinator.isHandoffActive,
+              isTextInputEvent(event) else {
             return false
         }
-        remindersData.pendingNewReminderTitle = (remindersData.pendingNewReminderTitle ?? "") + typedText
+        newReminderTypingCoordinator.enqueue(event)
         return true
     }
 
@@ -101,7 +107,7 @@ struct ContentView: View {
         .control, .format, .surrogate, .privateUse, .unassigned
     ]
 
-    private func printableText(from event: NSEvent) -> String? {
+    private func isTextInputEvent(_ event: NSEvent) -> Bool {
         let nonTypingModifiers: NSEvent.ModifierFlags = [.command, .control]
         guard event.modifierFlags.intersection(.deviceIndependentFlagsMask).isDisjoint(with: nonTypingModifiers),
               let characters = event.characters,
@@ -109,10 +115,9 @@ struct ContentView: View {
               characters.unicodeScalars.allSatisfy({
                   !Self.nonPrintableCategories.contains($0.properties.generalCategory)
               }) else {
-            return nil
+            return false
         }
-
-        return characters
+        return true
     }
 
     private func stopKeyMonitor() {
@@ -235,4 +240,5 @@ struct ListSectionModifier: ViewModifier {
 #Preview {
     ContentView()
         .environmentObject(RemindersData())
+        .environmentObject(NewReminderTypingCoordinator())
 }

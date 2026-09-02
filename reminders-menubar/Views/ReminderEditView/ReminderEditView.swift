@@ -8,6 +8,7 @@ struct ReminderEditView: View {
     }
 
     @EnvironmentObject var remindersData: RemindersData
+    @EnvironmentObject var newReminderTypingCoordinator: NewReminderTypingCoordinator
     @ObservedObject var userPreferences = UserPreferences.shared
 
     @Binding var isPresented: Bool
@@ -120,11 +121,6 @@ struct ReminderEditView: View {
                 if userPreferences.autoSuggestToday {
                     rmbReminder.setIsAutoSuggestingTodayForCreation()
                 }
-                if let pendingTitle = remindersData.pendingNewReminderTitle, !pendingTitle.isEmpty {
-                    rmbReminder.title = pendingTitle
-                    titleTextFieldFocusTrigger = UUID()
-                }
-                remindersData.pendingNewReminderTitle = nil
             }
         }
     }
@@ -173,6 +169,9 @@ struct ReminderEditView: View {
             textContainerDynamicHeight: $titleTextFieldDynamicHeight,
             focusTrigger: $titleTextFieldFocusTrigger
         )
+        .onDidBecomeFirstResponder { textView in
+            newReminderTypingCoordinator.replayPendingEvents(in: textView)
+        }
         .onSubmit { confirmAction() }
         .autoComplete(
             isInitialCharValid: { char in
@@ -390,6 +389,7 @@ struct ReminderEditView: View {
         isPresented: .constant(true)
     )
     .environmentObject(RemindersData())
+    .environmentObject(NewReminderTypingCoordinator())
 }
 
 #Preview("Edit mode") {
@@ -413,4 +413,5 @@ struct ReminderEditView: View {
         reminderHasChildren: false
     )
     .environmentObject(RemindersData())
+    .environmentObject(NewReminderTypingCoordinator())
 }

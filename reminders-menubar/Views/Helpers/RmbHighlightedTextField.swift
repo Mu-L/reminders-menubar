@@ -16,8 +16,11 @@ struct RmbHighlightedTextField: NSViewRepresentable {
 
     private var textFont = NSFont.systemFont(ofSize: NSFont.systemFontSize)
     private var onSubmit: (() -> Void)?
+    private var onDidBecomeFirstResponder: ((NSTextView) -> Void)?
     private var isInitialCharValidToAutoComplete: ((_ initialChar: String?) -> Bool)?
     private var autoCompleteSuggestions: ((_ initialChar: String?, _ typingWord: String) -> [String])?
+
+    // MARK: - NSViewRepresentable
 
     init(
         placeholder: String,
@@ -45,6 +48,7 @@ struct RmbHighlightedTextField: NSViewRepresentable {
 
         textView.placeholder = placeholder
         textView.shouldFocus = focusTrigger != nil
+        textView.onDidBecomeFirstResponder = onDidBecomeFirstResponder
         textView.isEditable = true
         textView.isSelectable = true
         textView.allowsUndo = true
@@ -56,34 +60,97 @@ struct RmbHighlightedTextField: NSViewRepresentable {
     }
 
     func updateNSView(_ nsView: NSScrollView, context: Context) {
-        guard let textView = nsView.documentView as? NSTextView else {
+        guard let textView = nsView.documentView as? PlaceholderNSTextView else {
             return
         }
 
         context.coordinator.parent = self
+        textView.onDidBecomeFirstResponder = onDidBecomeFirstResponder
 
+        // AppKit owns marked text until the input method commits its composition.
+        if !textView.hasMarkedText() {
+            let updatedText = text.wrappedValue
+            if updatedText == textView.string {
+                // Refresh highlighting without replacing characters, selection, or undo state.
+                if let textStorage = textView.textStorage {
+                    applyAttributes(to: textStorage)
+                }
+            } else if textView.window?.firstResponder !== textView {
+                // Keep the active editor authoritative so stale text cannot move its insertion point.
+                updateTextAndAttributes(in: textView, with: updatedText)
+            }
+        }
+
+        updateFocusIfNeeded(in: textView, coordinator: context.coordinator)
+
+        textView.scrollRangeToVisible(textView.selectedRange())
+
+        adjustDynamicHeight(for: textView, context: context)
+    }
+
+    func makeCoordinator() -> Coordinator {
+        return Coordinator(self)
+    }
+
+    // MARK: - Text and attributes
+
+    private func updateTextAndAttributes(in textView: NSTextView, with updatedText: String) {
         let selectedRange = textView.selectedRange()
-        let updatedText = text.wrappedValue
         let updatedTextLength = (updatedText as NSString).length
         let selectionLocation = min(selectedRange.location, updatedTextLength)
         let selectionLength = min(selectedRange.length, updatedTextLength - selectionLocation)
 
         textView.textStorage?.setAttributedString(getAttributedString(from: updatedText))
         textView.setSelectedRange(NSRange(location: selectionLocation, length: selectionLength))
+    }
 
-        if let trigger = focusTrigger?.wrappedValue,
-           trigger != context.coordinator.lastFocusTrigger {
-            context.coordinator.lastFocusTrigger = trigger
-            if nsView.window?.firstResponder != textView {
-                nsView.window?.makeFirstResponder(textView)
-            }
-            textView.setSelectedRange(NSRange(location: updatedTextLength, length: 0))
+    private func getAttributedString(from text: String) -> NSMutableAttributedString {
+        let attributedString = NSMutableAttributedString(string: text)
+        applyAttributes(to: attributedString)
+        return attributedString
+    }
+
+    private func applyAttributes(to attributedString: NSMutableAttributedString) {
+        let fullRange = NSRange(location: 0, length: attributedString.length)
+
+        attributedString.beginEditing()
+        attributedString.setAttributes(
+            [
+                .font: textFont,
+                .foregroundColor: NSColor.labelColor
+            ],
+            range: fullRange
+        )
+        for highlightedText in highlightedTexts
+        where highlightedText.range.location != NSNotFound
+            && NSMaxRange(highlightedText.range) <= attributedString.length {
+            attributedString.addAttribute(
+                .foregroundColor,
+                value: highlightedText.color,
+                range: highlightedText.range
+            )
+        }
+        attributedString.endEditing()
+    }
+
+    // MARK: - Focus
+
+    private func updateFocusIfNeeded(in textView: NSTextView, coordinator: Coordinator) {
+        guard let trigger = focusTrigger?.wrappedValue,
+              trigger != coordinator.lastFocusTrigger else {
+            return
         }
 
-        textView.scrollRangeToVisible(NSRange(location: updatedTextLength, length: 0))
+        coordinator.lastFocusTrigger = trigger
+        if textView.window?.firstResponder != textView {
+            textView.window?.makeFirstResponder(textView)
+        }
 
-        adjustDynamicHeight(for: textView, context: context)
+        let textLength = (textView.string as NSString).length
+        textView.setSelectedRange(NSRange(location: textLength, length: 0))
     }
+
+    // MARK: - Layout
 
     private func adjustDynamicHeight(for textView: NSTextView, context: Context) {
         var newHeight: CGFloat = 48.0
@@ -98,38 +165,9 @@ struct RmbHighlightedTextField: NSViewRepresentable {
         }
     }
 
-    private func getAttributedString(from text: String) -> NSMutableAttributedString {
-        let fullRange = text.fullRange
+    // MARK: - Coordinator
 
-        let attributedString = NSMutableAttributedString(string: text)
-        attributedString.beginEditing()
-        attributedString.addAttribute(
-            .font,
-            value: textFont,
-            range: fullRange
-        )
-        attributedString.addAttribute(
-            .foregroundColor,
-            value: NSColor.labelColor,
-            range: fullRange
-        )
-        for highlightedText in highlightedTexts {
-            attributedString.addAttribute(
-                .foregroundColor,
-                value: highlightedText.color,
-                range: highlightedText.range
-            )
-        }
-        attributedString.endEditing()
-
-        return attributedString
-    }
-
-    func makeCoordinator() -> Coordinator {
-        return Coordinator(self)
-    }
-
-    class Coordinator: NSObject, NSTextViewDelegate, NSTextDelegate {
+    class Coordinator: NSObject, NSTextViewDelegate {
         var parent: RmbHighlightedTextField
 
         var isAutoCompleting = false
@@ -139,6 +177,8 @@ struct RmbHighlightedTextField: NSViewRepresentable {
         init(_ parent: RmbHighlightedTextField) {
             self.parent = parent
         }
+
+        // MARK: - Commands
 
         func textView(_ textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
             switch commandSelector {
@@ -185,28 +225,52 @@ struct RmbHighlightedTextField: NSViewRepresentable {
             return true
         }
 
+        // MARK: - Text changes
+
         func textDidChange(_ obj: Notification) {
             guard let textView = obj.object as? NSTextView else {
                 return
             }
 
-            if parent.text.wrappedValue == textView.string {
-                // NOTE: When auto-completing the text may not have differences.
-                // We change the parent text to trigger the updateNSView.
-                parent.text.wrappedValue += " "
+            let textMatchesBinding = parent.text.wrappedValue == textView.string
+            if !textMatchesBinding {
+                parent.text.wrappedValue = textView.string
             }
-
-            parent.text.wrappedValue = textView.string
 
             if isDeletePressed {
                 isDeletePressed = false
                 return
             }
 
-            if !isAutoCompleting {
-                isAutoCompleting = true
-                textView.complete(nil)
-                isAutoCompleting = false
+            requestCompletions(in: textView)
+
+            // A same-text completion does not trigger updateNSView, so refresh attributes
+            // after AppKit finishes processing the completion request.
+            if textMatchesBinding {
+                schedulePostCompletionAttributeRefresh(for: textView)
+            }
+        }
+
+        // MARK: - Autocomplete
+
+        private func requestCompletions(in textView: NSTextView) {
+            guard !isAutoCompleting, !textView.hasMarkedText() else { return }
+
+            isAutoCompleting = true
+            textView.complete(nil)
+            isAutoCompleting = false
+        }
+
+        private func schedulePostCompletionAttributeRefresh(for textView: NSTextView) {
+            DispatchQueue.main.async { [weak self, weak textView] in
+                guard let self, let textView,
+                      !textView.hasMarkedText(),
+                      parent.text.wrappedValue == textView.string,
+                      let textStorage = textView.textStorage else {
+                    return
+                }
+
+                parent.applyAttributes(to: textStorage)
             }
         }
 
@@ -244,7 +308,17 @@ struct RmbHighlightedTextField: NSViewRepresentable {
     }
 }
 
+// MARK: - Modifiers
+
 extension RmbHighlightedTextField {
+    func onDidBecomeFirstResponder(
+        _ action: @escaping (NSTextView) -> Void
+    ) -> RmbHighlightedTextField {
+        var view = self
+        view.onDidBecomeFirstResponder = action
+        return view
+    }
+
     func onSubmit(_ onSubmit: @escaping () -> Void) -> RmbHighlightedTextField {
         var view = self
         view.onSubmit = onSubmit
@@ -268,9 +342,12 @@ extension RmbHighlightedTextField {
     }
 }
 
+// MARK: - AppKit text view
+
 private class PlaceholderNSTextView: NSTextView {
     var placeholder: String = ""
     var shouldFocus: Bool = false
+    var onDidBecomeFirstResponder: ((NSTextView) -> Void)?
 
     override func draw(_ rect: CGRect) {
         if string.isEmpty && !placeholder.isEmpty {
@@ -288,5 +365,21 @@ private class PlaceholderNSTextView: NSTextView {
         if shouldFocus {
             window?.makeFirstResponder(self)
         }
+    }
+
+    override func becomeFirstResponder() -> Bool {
+        guard super.becomeFirstResponder() else { return false }
+        // Let AppKit finish installing the field editor before replaying captured key events.
+        DispatchQueue.main.async { [weak self] in
+            guard let self, window?.firstResponder === self else { return }
+
+            window?.contentView?.layoutSubtreeIfNeeded()
+            if let layoutManager, let textContainer {
+                layoutManager.ensureLayout(for: textContainer)
+            }
+
+            onDidBecomeFirstResponder?(self)
+        }
+        return true
     }
 }

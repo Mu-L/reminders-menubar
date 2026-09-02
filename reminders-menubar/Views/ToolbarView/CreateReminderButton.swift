@@ -2,6 +2,7 @@ import SwiftUI
 
 struct CreateReminderButton: View {
     @EnvironmentObject var remindersData: RemindersData
+    @EnvironmentObject var newReminderTypingCoordinator: NewReminderTypingCoordinator
     @State private var showingCreateView = false
 
     var body: some View {
@@ -29,8 +30,8 @@ struct CreateReminderButton: View {
         ) { _ in
             resetCreateReminderSheetState()
         }
-        .onChange(of: remindersData.pendingNewReminderTitle) { newValue in
-            guard newValue != nil, !showingCreateView else { return }
+        .onChange(of: newReminderTypingCoordinator.isHandoffActive) { isActive in
+            guard isActive, !showingCreateView else { return }
             showingCreateView = true
         }
         .sheet(isPresented: $showingCreateView, onDismiss: resetCreateReminderSheetState) {
@@ -40,11 +41,12 @@ struct CreateReminderButton: View {
 
     private func resetCreateReminderSheetState() {
         showingCreateView = false
-        remindersData.pendingNewReminderTitle = nil
+        newReminderTypingCoordinator.reset()
     }
 }
 
 #Preview {
     CreateReminderButton()
         .environmentObject(RemindersData())
+        .environmentObject(NewReminderTypingCoordinator())
 }

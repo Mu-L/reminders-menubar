@@ -48,10 +48,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let contentView = ContentView()
         let remindersData = RemindersData()
         let copyShortcutCoordinator = CopyShortcutCoordinator()
+        let newReminderTypingCoordinator = NewReminderTypingCoordinator()
         return NSHostingController(
             rootView: contentView
                 .environmentObject(remindersData)
                 .environmentObject(copyShortcutCoordinator)
+                .environmentObject(newReminderTypingCoordinator)
         )
     }
 
