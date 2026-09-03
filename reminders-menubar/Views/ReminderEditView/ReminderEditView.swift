@@ -17,8 +17,12 @@ struct ReminderEditView: View {
     @State var rmbReminder: RmbReminder
 
     @State var titleTextFieldFocusTrigger = UUID()
-    @State var titleTextFieldDynamicHeight: CGFloat = 0
-    @State var notesTextFieldDynamicHeight: CGFloat = 0
+    @State var titleTextFieldDynamicHeight = NSLayoutManager().defaultLineHeight(
+        for: .preferredFont(forTextStyle: .title3)
+    )
+    @State var notesTextFieldDynamicHeight = NSLayoutManager().defaultLineHeight(
+        for: .systemFont(ofSize: NSFont.systemFontSize)
+    )
 
     @State private var showingRemoveAlert = false
     @State private var removeButtonIsHovered = false

@@ -153,15 +153,23 @@ struct RmbHighlightedTextField: NSViewRepresentable {
     // MARK: - Layout
 
     private func adjustDynamicHeight(for textView: NSTextView, context: Context) {
-        var newHeight: CGFloat = 48.0
-        if let layoutManager = textView.layoutManager,
-           let textContainer = textView.textContainer {
-            let maxHeight = layoutManager.defaultLineHeight(for: textFont) * CGFloat(maximumNumberOfLines)
-            newHeight = min(layoutManager.usedRect(for: textContainer).height, maxHeight)
+        guard let dynamicHeight = context.coordinator.parent.textContainerDynamicHeight,
+              let layoutManager = textView.layoutManager,
+              let textContainer = textView.textContainer else {
+            return
+        }
+
+        let lineHeight = layoutManager.defaultLineHeight(for: textFont)
+        let maxHeight = lineHeight * CGFloat(max(maximumNumberOfLines, 1))
+        let usedHeight = layoutManager.usedRect(for: textContainer).height
+        let newHeight = min(max(usedHeight, lineHeight), maxHeight)
+
+        guard dynamicHeight.wrappedValue != newHeight else {
+            return
         }
 
         DispatchQueue.main.async {
-            context.coordinator.parent.textContainerDynamicHeight?.wrappedValue = newHeight
+            dynamicHeight.wrappedValue = newHeight
         }
     }
 
@@ -348,6 +356,8 @@ private class PlaceholderNSTextView: NSTextView {
     var onDidBecomeFirstResponder: ((NSTextView) -> Void)?
 
     override func draw(_ rect: CGRect) {
+        super.draw(rect)
+
         if string.isEmpty && !placeholder.isEmpty {
             let attributes: [NSAttributedString.Key: Any] = [
                 .font: font ?? .systemFont(ofSize: NSFont.systemFontSize),
@@ -356,7 +366,6 @@ private class PlaceholderNSTextView: NSTextView {
 
             placeholder.draw(in: rect.insetBy(dx: 4, dy: 0), withAttributes: attributes)
         }
-        super.draw(rect)
     }
 
     override func viewDidMoveToWindow() {
