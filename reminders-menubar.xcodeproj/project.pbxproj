@@ -127,6 +127,7 @@
 		71F93A632E03B6DA00D5C5BC /* ReminderDateDescriptionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71F93A622E03B6DA00D5C5BC /* ReminderDateDescriptionView.swift */; };
 		71F93A652E03B93100D5C5BC /* ReminderExternalLinksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71F93A642E03B93100D5C5BC /* ReminderExternalLinksView.swift */; };
 		71F9726A25981EDF00D0A118 /* NSTableView+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71F9726925981EDF00D0A118 /* NSTableView+Extensions.swift */; };
+		71FM00012FA9000100000001 /* FocusDirection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71FM00002FA9000100000001 /* FocusDirection.swift */; };
 		71FP00012FA9000100000001 /* FilterPanelController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71FP00002FA9000100000001 /* FilterPanelController.swift */; };
 		71FP00032FA9000100000001 /* FilterPanelContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71FP00022FA9000100000001 /* FilterPanelContentView.swift */; };
 		71FS00012FA8000100000001 /* ReminderListSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71FS00002FA8000100000001 /* ReminderListSection.swift */; };
@@ -278,6 +279,7 @@
 		71F93A622E03B6DA00D5C5BC /* ReminderDateDescriptionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderDateDescriptionView.swift; sourceTree = "<group>"; };
 		71F93A642E03B93100D5C5BC /* ReminderExternalLinksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderExternalLinksView.swift; sourceTree = "<group>"; };
 		71F9726925981EDF00D0A118 /* NSTableView+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSTableView+Extensions.swift"; sourceTree = "<group>"; };
+		71FM00002FA9000100000001 /* FocusDirection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusDirection.swift; sourceTree = "<group>"; };
 		71FP00002FA9000100000001 /* FilterPanelController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterPanelController.swift; sourceTree = "<group>"; };
 		71FP00022FA9000100000001 /* FilterPanelContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterPanelContentView.swift; sourceTree = "<group>"; };
 		71FS00002FA8000100000001 /* ReminderListSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderListSection.swift; sourceTree = "<group>"; };
@@ -379,6 +381,7 @@
 				718AE6D62F84A35D00B53E04 /* Modifiers */,
 				71B4AD4E25B7D06400214219 /* CalendarTitle.swift */,
 				71A000022F724B7500000001 /* ColoredDotTitle.swift */,
+				71FM00002FA9000100000001 /* FocusDirection.swift */,
 				71AABB002F8E5A0000000001 /* RemoveReminderAlert.swift */,
 				B55D54FD2F37E4E5002DE761 /* PopoverResizeHandleView.swift */,
 				714C28A72A0A056600734DAF /* RmbHighlightedTextField.swift */,
@@ -806,6 +809,7 @@
 				71CCF9842D43148100D334F8 /* EKReminderPriority+Extensions.swift in Sources */,
 				71E7126A2908C6D100DA97BD /* Binding+Extensions.swift in Sources */,
 				714C28A82A0A056600734DAF /* RmbHighlightedTextField.swift in Sources */,
+				71FM00012FA9000100000001 /* FocusDirection.swift in Sources */,
 				71A000032F724B7500000001 /* ColoredDotTitle.swift in Sources */,
 				718C0C632D43220A00BF04B0 /* PriorityParser.swift in Sources */,
 				71F93A632E03B6DA00D5C5BC /* ReminderDateDescriptionView.swift in Sources */,

@@ -11,11 +11,12 @@ struct RmbHighlightedTextField: NSViewRepresentable {
     var highlightedTexts: [HighlightedText]
     var textContainerDynamicHeight: Binding<CGFloat>?
     var maximumNumberOfLines: Int
-    var allowNewLineAndTab: Bool
-    var focusTrigger: Binding<UUID>?
+    var allowsLineBreaks: Bool
+    var focusTrigger: Binding<UUID?>?
 
     private var textFont = NSFont.systemFont(ofSize: NSFont.systemFontSize)
     private var onSubmit: (() -> Void)?
+    private var onMoveFocus: ((FocusDirection) -> Void)?
     private var onDidBecomeFirstResponder: ((NSTextView) -> Void)?
     private var isInitialCharValidToAutoComplete: ((_ initialChar: String?) -> Bool)?
     private var autoCompleteSuggestions: ((_ initialChar: String?, _ typingWord: String) -> [String])?
@@ -28,15 +29,15 @@ struct RmbHighlightedTextField: NSViewRepresentable {
         highlightedTexts: [HighlightedText] = [],
         textContainerDynamicHeight: Binding<CGFloat>? = nil,
         maximumNumberOfLines: Int = 3,
-        allowNewLineAndTab: Bool = false,
-        focusTrigger: Binding<UUID>? = nil
+        allowsLineBreaks: Bool = false,
+        focusTrigger: Binding<UUID?>? = nil
     ) {
         self.placeholder = placeholder
         self.text = text
         self.highlightedTexts = highlightedTexts
         self.textContainerDynamicHeight = textContainerDynamicHeight
         self.maximumNumberOfLines = maximumNumberOfLines
-        self.allowNewLineAndTab = allowNewLineAndTab
+        self.allowsLineBreaks = allowsLineBreaks
         self.focusTrigger = focusTrigger
     }
 
@@ -47,7 +48,7 @@ struct RmbHighlightedTextField: NSViewRepresentable {
         }
 
         textView.placeholder = placeholder
-        textView.shouldFocus = focusTrigger != nil
+        textView.shouldFocus = focusTrigger?.wrappedValue != nil
         textView.onDidBecomeFirstResponder = onDidBecomeFirstResponder
         textView.isEditable = true
         textView.isSelectable = true
@@ -182,6 +183,8 @@ struct RmbHighlightedTextField: NSViewRepresentable {
         var isDeletingText = false
         var lastFocusTrigger: UUID?
 
+        private let relevantModifiers: NSEvent.ModifierFlags = [.command, .option, .shift, .control]
+
         init(_ parent: RmbHighlightedTextField) {
             self.parent = parent
         }
@@ -192,20 +195,36 @@ struct RmbHighlightedTextField: NSViewRepresentable {
             switch commandSelector {
             case #selector(NSResponder.insertNewline(_:)):
                 return handleNewline()
+            case #selector(NSResponder.insertTab(_:)):
+                return handleFocusMove(.forward, expectedModifiers: [])
+            case #selector(NSResponder.insertBacktab(_:)):
+                return handleFocusMove(.backward, expectedModifiers: .shift)
             default:
                 return false
             }
         }
 
-        private func handleNewline() -> Bool {
-            let relevantModifiers: NSEvent.ModifierFlags = [.command, .option, .shift, .control]
+        private func handleFocusMove(
+            _ direction: FocusDirection,
+            expectedModifiers: NSEvent.ModifierFlags
+        ) -> Bool {
             let modifiers = NSApp.currentEvent?.modifierFlags.intersection(relevantModifiers) ?? []
-
-            if parent.allowNewLineAndTab, !modifiers.isEmpty {
+            guard modifiers == expectedModifiers, let onMoveFocus = parent.onMoveFocus else {
                 return false
             }
 
-            guard let onSubmit = parent.onSubmit else {
+            onMoveFocus(direction)
+            return true
+        }
+
+        private func handleNewline() -> Bool {
+            let modifiers = NSApp.currentEvent?.modifierFlags.intersection(relevantModifiers) ?? []
+
+            if parent.allowsLineBreaks, modifiers == .shift {
+                return false
+            }
+
+            guard let onSubmit = parent.onSubmit, modifiers.isEmpty else {
                 return false
             }
 
@@ -224,7 +243,12 @@ struct RmbHighlightedTextField: NSViewRepresentable {
 
             isDeletingText = replacementString.isEmpty && affectedCharRange.length > 0
 
-            if !parent.allowNewLineAndTab && (replacementString == "\n" || replacementString == "\t") {
+            if replacementString == "\n" {
+                let modifiers = NSApp.currentEvent?.modifierFlags.intersection(relevantModifiers)
+                return parent.allowsLineBreaks && modifiers == .shift
+            }
+
+            if replacementString == "\t" {
                 return false
             }
 
@@ -328,6 +352,14 @@ extension RmbHighlightedTextField {
     func onSubmit(_ onSubmit: @escaping () -> Void) -> RmbHighlightedTextField {
         var view = self
         view.onSubmit = onSubmit
+        return view
+    }
+
+    func onMoveFocus(
+        _ onMoveFocus: @escaping (FocusDirection) -> Void
+    ) -> RmbHighlightedTextField {
+        var view = self
+        view.onMoveFocus = onMoveFocus
         return view
     }
 

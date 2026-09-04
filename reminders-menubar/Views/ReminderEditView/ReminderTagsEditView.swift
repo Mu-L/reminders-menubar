@@ -6,6 +6,8 @@ struct ReminderTagsEditView: View {
     var onCommitEmpty: (() -> Void)?
     let onRemoveTag: (String) -> Void
     let onRemoveLastTag: () -> Void
+    @Binding var focusTrigger: UUID?
+    let onMoveFocus: (FocusDirection) -> Void
 
     @State private var newTagText = ""
 
@@ -28,7 +30,9 @@ struct ReminderTagsEditView: View {
                         onCommit: commitTag,
                         onCommitEmpty: onCommitEmpty,
                         onDeleteBackward: onRemoveLastTag,
-                        autoCompleteSuggestions: { TagParser.autoCompleteSuggestions($0) }
+                        autoCompleteSuggestions: { TagParser.autoCompleteSuggestions($0) },
+                        focusTrigger: $focusTrigger,
+                        onMoveFocus: onMoveFocus
                     )
                     .frame(minWidth: 60, maxWidth: 120)
                     .frame(height: 20)
@@ -68,7 +72,9 @@ private struct TagPillView: View {
         tagNames: ["sample", "review", "important"],
         onCommitTag: { _ in },
         onRemoveTag: { _ in },
-        onRemoveLastTag: {}
+        onRemoveLastTag: {},
+        focusTrigger: .constant(nil),
+        onMoveFocus: { _ in }
     )
 }
 
@@ -81,6 +87,8 @@ private struct TagTextField: NSViewRepresentable {
     var onCommitEmpty: (() -> Void)?
     var onDeleteBackward: () -> Void
     var autoCompleteSuggestions: ((_ typingWord: String) -> [String])?
+    @Binding var focusTrigger: UUID?
+    var onMoveFocus: (FocusDirection) -> Void
 
     func makeNSView(context: Context) -> NSTextField {
         let textField = NSTextField()
@@ -98,18 +106,38 @@ private struct TagTextField: NSViewRepresentable {
 
     func updateNSView(_ nsView: NSTextField, context: Context) {
         context.coordinator.parent = self
+
         if nsView.stringValue != text {
             nsView.stringValue = text
         }
+
+        updateFocusIfNeeded(in: nsView, coordinator: context.coordinator)
     }
 
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
     }
 
+    private func updateFocusIfNeeded(in nsView: NSTextField, coordinator: Coordinator) {
+        guard let trigger = focusTrigger,
+              trigger != coordinator.lastFocusTrigger else {
+            return
+        }
+
+        guard nsView.window?.makeFirstResponder(nsView) == true,
+              let textView = nsView.currentEditor() as? NSTextView else {
+            return
+        }
+
+        coordinator.lastFocusTrigger = trigger
+        let textLength = (textView.string as NSString).length
+        textView.setSelectedRange(NSRange(location: textLength, length: 0))
+    }
+
     class Coordinator: NSObject, NSTextFieldDelegate {
         var parent: TagTextField
         var isAutoCompleting = false
+        var lastFocusTrigger: UUID?
 
         init(_ parent: TagTextField) {
             self.parent = parent
@@ -137,21 +165,41 @@ private struct TagTextField: NSViewRepresentable {
         }
 
         func control(_ control: NSControl, textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
-            if commandSelector == #selector(NSResponder.insertNewline(_:)) {
+            switch commandSelector {
+            case #selector(NSResponder.insertNewline(_:)):
                 if textView.string.isEmpty {
                     parent.onCommitEmpty?()
                 } else {
                     parent.onCommit()
                 }
                 return true
-            }
-            if commandSelector == #selector(NSResponder.deleteBackward(_:)) {
+            case #selector(NSResponder.insertTab(_:)):
+                return handleFocusMove(.forward, expectedModifiers: [])
+            case #selector(NSResponder.insertBacktab(_:)):
+                return handleFocusMove(.backward, expectedModifiers: .shift)
+            case #selector(NSResponder.deleteBackward(_:)):
                 if textView.string.isEmpty {
                     parent.onDeleteBackward()
                     return true
                 }
+                return false
+            default:
+                return false
             }
-            return false
+        }
+
+        private func handleFocusMove(
+            _ direction: FocusDirection,
+            expectedModifiers: NSEvent.ModifierFlags
+        ) -> Bool {
+            let relevantModifiers: NSEvent.ModifierFlags = [.command, .option, .shift, .control]
+            let modifiers = NSApp.currentEvent?.modifierFlags.intersection(relevantModifiers) ?? []
+            guard modifiers == expectedModifiers else {
+                return false
+            }
+
+            parent.onMoveFocus(direction)
+            return true
         }
 
         func control(

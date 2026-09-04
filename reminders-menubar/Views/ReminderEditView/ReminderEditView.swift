@@ -16,7 +16,7 @@ struct ReminderEditView: View {
     let mode: Mode
     @State var rmbReminder: RmbReminder
 
-    @State var titleTextFieldFocusTrigger = UUID()
+    @StateObject private var focusCoordinator = ReminderEditFocusCoordinator()
     @State var titleTextFieldDynamicHeight = NSLayoutManager().defaultLineHeight(
         for: .preferredFont(forTextStyle: .title3)
     )
@@ -94,7 +94,9 @@ struct ReminderEditView: View {
                     onCommitTag: { rmbReminder.addTag(named: $0) },
                     onCommitEmpty: { confirmAction() },
                     onRemoveTag: { rmbReminder.removeTag(named: $0) },
-                    onRemoveLastTag: { rmbReminder.removeLastTag() }
+                    onRemoveLastTag: { rmbReminder.removeLastTag() },
+                    focusTrigger: $focusCoordinator.tagsTrigger,
+                    onMoveFocus: { focusCoordinator.moveFocus(from: .tags, direction: $0) }
                 )
             }
 
@@ -171,11 +173,12 @@ struct ReminderEditView: View {
             text: $rmbReminder.title,
             highlightedTexts: rmbReminder.highlightedTexts,
             textContainerDynamicHeight: $titleTextFieldDynamicHeight,
-            focusTrigger: $titleTextFieldFocusTrigger
+            focusTrigger: $focusCoordinator.titleTrigger
         )
         .onDidBecomeFirstResponder { textView in
             newReminderTypingCoordinator.replayPendingEvents(in: textView)
         }
+        .onMoveFocus { focusCoordinator.moveFocus(from: .title, direction: $0) }
         .onSubmit { confirmAction() }
         .autoComplete(
             isInitialCharValid: { char in
@@ -199,8 +202,10 @@ struct ReminderEditView: View {
             placeholder: rmbLocalized(.editReminderNotesTextFieldPlaceholder),
             text: Binding($rmbReminder.notes, replacingNilWith: ""),
             textContainerDynamicHeight: $notesTextFieldDynamicHeight,
-            allowNewLineAndTab: true
+            allowsLineBreaks: true,
+            focusTrigger: $focusCoordinator.notesTrigger
         )
+        .onMoveFocus { focusCoordinator.moveFocus(from: .notes, direction: $0) }
         .onSubmit { confirmAction() }
         .frame(height: notesTextFieldDynamicHeight)
     }
@@ -418,4 +423,43 @@ struct ReminderEditView: View {
     )
     .environmentObject(RemindersData())
     .environmentObject(NewReminderTypingCoordinator())
+}
+
+// MARK: - Focus Coordinator
+
+private final class ReminderEditFocusCoordinator: ObservableObject {
+    enum Field: Equatable {
+        case title
+        case notes
+        case tags
+    }
+
+    @Published var titleTrigger: UUID? = UUID()
+    @Published var notesTrigger: UUID?
+    @Published var tagsTrigger: UUID?
+
+    private var fieldOrder: [Field] {
+        if #available(macOS 12, *) {
+            return [.title, .notes, .tags]
+        } else {
+            return [.title, .notes]
+        }
+    }
+
+    func moveFocus(from field: Field, direction: FocusDirection) {
+        guard let currentIndex = fieldOrder.firstIndex(of: field) else { return }
+        let destinationIndex = (currentIndex + direction.offset + fieldOrder.count) % fieldOrder.count
+        focus(fieldOrder[destinationIndex])
+    }
+
+    private func focus(_ field: Field) {
+        switch field {
+        case .title:
+            titleTrigger = UUID()
+        case .notes:
+            notesTrigger = UUID()
+        case .tags:
+            tagsTrigger = UUID()
+        }
+    }
 }
