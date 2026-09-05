@@ -3,7 +3,7 @@ import SwiftUI
 struct ReminderTagsEditView: View {
     let tagNames: [String]
     let onCommitTag: (String) -> Void
-    var onCommitEmpty: (() -> Void)?
+    var onCommitEmpty: () -> Void
     let onRemoveTag: (String) -> Void
     let onRemoveLastTag: () -> Void
     @Binding var focusTrigger: UUID?
@@ -18,34 +18,57 @@ struct ReminderTagsEditView: View {
                 .foregroundColor(.secondary)
                 .frame(width: 20)
 
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(alignment: .center, spacing: 4) {
-                    ForEach(tagNames, id: \.self) { tag in
-                        TagPillView(name: tag, onRemove: { onRemoveTag(tag) })
-                    }
+            ScrollViewReader { scrollProxy in
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(alignment: .center, spacing: 4) {
+                        ForEach(tagNames, id: \.self) { tag in
+                            TagPillView(name: tag, onRemove: { onRemoveTag(tag) })
+                        }
 
-                    TagTextField(
-                        text: $newTagText,
-                        placeholder: rmbLocalized(.editReminderTagsTextFieldPlaceholder),
-                        onCommit: commitTag,
-                        onCommitEmpty: onCommitEmpty,
-                        onDeleteBackward: onRemoveLastTag,
-                        autoCompleteSuggestions: { TagParser.autoCompleteSuggestions($0) },
-                        focusTrigger: $focusTrigger,
-                        onMoveFocus: onMoveFocus
-                    )
-                    .frame(minWidth: 60, maxWidth: 120)
-                    .frame(height: 20)
+                        TagTextField(
+                            text: $newTagText,
+                            placeholder: rmbLocalized(.editReminderTagsTextFieldPlaceholder),
+                            onCommit: commitTag,
+                            onCommitEmpty: onCommitEmpty,
+                            onDeleteBackward: onRemoveLastTag,
+                            autoCompleteSuggestions: { TagParser.autoCompleteSuggestions($0) },
+                            focusTrigger: $focusTrigger,
+                            onMoveFocus: onMoveFocus
+                        )
+                        .frame(minWidth: 60)
+                        .frame(height: 20)
+
+                        Color.clear
+                            .frame(width: 1, height: 1)
+                            .id(ScrollAnchor.trailing)
+                    }
                 }
+                .onChange(of: newTagText) { _ in scrollToEnd(using: scrollProxy) }
+                .onChange(of: tagNames) { _ in scrollToEnd(using: scrollProxy) }
+                .onChange(of: focusTrigger) { _ in scrollToEnd(using: scrollProxy) }
             }
         }
     }
+
+    // MARK: - Actions
 
     private func commitTag() {
         onCommitTag(newTagText)
         newTagText = ""
     }
+
+    private func scrollToEnd(using proxy: ScrollViewProxy) {
+        DispatchQueue.main.async {
+            proxy.scrollTo(ScrollAnchor.trailing, anchor: .trailing)
+        }
+    }
+
+    private enum ScrollAnchor {
+        case trailing
+    }
 }
+
+// MARK: - Tag pill
 
 private struct TagPillView: View {
     let name: String
@@ -67,10 +90,13 @@ private struct TagPillView: View {
     }
 }
 
+// MARK: - Preview
+
 #Preview {
     ReminderTagsEditView(
         tagNames: ["sample", "review", "important"],
         onCommitTag: { _ in },
+        onCommitEmpty: { },
         onRemoveTag: { _ in },
         onRemoveLastTag: {},
         focusTrigger: .constant(nil),
@@ -84,48 +110,52 @@ private struct TagTextField: NSViewRepresentable {
     @Binding var text: String
     var placeholder: String
     var onCommit: () -> Void
-    var onCommitEmpty: (() -> Void)?
+    var onCommitEmpty: () -> Void
     var onDeleteBackward: () -> Void
-    var autoCompleteSuggestions: ((_ typingWord: String) -> [String])?
+    var autoCompleteSuggestions: (_ typingWord: String) -> [String]
     @Binding var focusTrigger: UUID?
     var onMoveFocus: (FocusDirection) -> Void
 
-    func makeNSView(context: Context) -> NSTextField {
-        let textField = NSTextField()
-        textField.placeholderString = placeholder
-        textField.isBordered = false
-        textField.drawsBackground = false
-        textField.font = .systemFont(ofSize: 11)
-        textField.cell?.usesSingleLineMode = true
-        textField.cell?.wraps = false
-        textField.cell?.isScrollable = true
-        textField.lineBreakMode = .byClipping
-        textField.delegate = context.coordinator
-        return textField
+    // MARK: - NSViewRepresentable
+
+    func makeNSView(context: Context) -> TagNSTextView {
+        let textView = TagNSTextView()
+        textView.placeholder = placeholder
+        textView.textContainer?.maximumNumberOfLines = 1
+        textView.font = .systemFont(ofSize: 11)
+        textView.allowsUndo = true
+        textView.drawsBackground = false
+        textView.isRichText = false
+        textView.importsGraphics = false
+        textView.delegate = context.coordinator
+        return textView
     }
 
-    func updateNSView(_ nsView: NSTextField, context: Context) {
+    func updateNSView(_ textView: TagNSTextView, context: Context) {
         context.coordinator.parent = self
 
-        if nsView.stringValue != text {
-            nsView.stringValue = text
+        if !textView.hasMarkedText(),
+           textView.string != text,
+           textView.window?.firstResponder !== textView {
+            textView.string = text
         }
 
-        updateFocusIfNeeded(in: nsView, coordinator: context.coordinator)
+        updateFocusIfNeeded(in: textView, coordinator: context.coordinator)
     }
 
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
     }
 
-    private func updateFocusIfNeeded(in nsView: NSTextField, coordinator: Coordinator) {
+    // MARK: - Focus
+
+    private func updateFocusIfNeeded(in textView: NSTextView, coordinator: Coordinator) {
         guard let trigger = focusTrigger,
               trigger != coordinator.lastFocusTrigger else {
             return
         }
 
-        guard nsView.window?.makeFirstResponder(nsView) == true,
-              let textView = nsView.currentEditor() as? NSTextView else {
+        guard textView.window?.makeFirstResponder(textView) == true else {
             return
         }
 
@@ -134,49 +164,58 @@ private struct TagTextField: NSViewRepresentable {
         textView.setSelectedRange(NSRange(location: textLength, length: 0))
     }
 
-    class Coordinator: NSObject, NSTextFieldDelegate {
+    // MARK: - Coordinator
+
+    class Coordinator: NSObject, NSTextViewDelegate {
         var parent: TagTextField
         var isAutoCompleting = false
+        var isDeletingText = false
         var lastFocusTrigger: UUID?
 
         init(_ parent: TagTextField) {
             self.parent = parent
         }
 
-        func controlTextDidChange(_ obj: Notification) {
-            guard let textField = obj.object as? NSTextField else { return }
-            let value = textField.stringValue
+        // MARK: - Text changes
 
-            if value.last == "," || value.last == " " {
-                parent.text = value
-                parent.onCommit()
-                textField.stringValue = ""
+        func textDidChange(_ obj: Notification) {
+            guard let textView = obj.object as? NSTextView else {
                 return
             }
 
-            parent.text = value
-
-            if !isAutoCompleting, parent.autoCompleteSuggestions != nil,
-               let fieldEditor = textField.currentEditor() as? NSTextView {
-                isAutoCompleting = true
-                fieldEditor.complete(nil)
-                isAutoCompleting = false
+            let value = textView.string
+            if parent.text != value {
+                parent.text = value
             }
+
+            if value.last == "," || value.last == " " {
+                commitValue(from: textView)
+                return
+            }
+
+            if isDeletingText {
+                isDeletingText = false
+                return
+            }
+
+            requestCompletions(in: textView)
         }
 
-        func control(_ control: NSControl, textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
+        // MARK: - Commands
+
+        func textView(_ textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
             switch commandSelector {
             case #selector(NSResponder.insertNewline(_:)):
-                if textView.string.isEmpty {
-                    parent.onCommitEmpty?()
-                } else {
-                    parent.onCommit()
+                guard !textView.string.isEmpty else {
+                    parent.onCommitEmpty()
+                    return true
                 }
+                commitValue(from: textView)
                 return true
             case #selector(NSResponder.insertTab(_:)):
-                return handleFocusMove(.forward, expectedModifiers: [])
+                return handleTab(in: textView, direction: .forward, expectedModifiers: [])
             case #selector(NSResponder.insertBacktab(_:)):
-                return handleFocusMove(.backward, expectedModifiers: .shift)
+                return handleTab(in: textView, direction: .backward, expectedModifiers: .shift)
             case #selector(NSResponder.deleteBackward(_:)):
                 if textView.string.isEmpty {
                     parent.onDeleteBackward()
@@ -188,37 +227,115 @@ private struct TagTextField: NSViewRepresentable {
             }
         }
 
-        private func handleFocusMove(
-            _ direction: FocusDirection,
+        func textView(
+            _ textView: NSTextView,
+            shouldChangeTextIn affectedCharRange: NSRange,
+            replacementString: String?
+        ) -> Bool {
+            guard let replacementString else { return true }
+            guard replacementString.rangeOfCharacter(from: .newlines) == nil else { return false }
+
+            isDeletingText = replacementString.isEmpty && affectedCharRange.length > 0
+            return true
+        }
+
+        private func handleTab(
+            in textView: NSTextView,
+            direction: FocusDirection,
             expectedModifiers: NSEvent.ModifierFlags
         ) -> Bool {
             let relevantModifiers: NSEvent.ModifierFlags = [.command, .option, .shift, .control]
             let modifiers = NSApp.currentEvent?.modifierFlags.intersection(relevantModifiers) ?? []
-            guard modifiers == expectedModifiers else {
-                return false
+            guard modifiers == expectedModifiers else { return false }
+
+            guard textView.string.isEmpty else {
+                commitValue(from: textView)
+                return true
             }
 
             parent.onMoveFocus(direction)
             return true
         }
 
-        func control(
-            _ control: NSControl,
-            textView: NSTextView,
+        private func commitValue(from textView: NSTextView) {
+            parent.text = textView.string
+            parent.onCommit()
+            textView.string = ""
+        }
+
+        // MARK: - Autocomplete
+
+        private func requestCompletions(in textView: NSTextView) {
+            guard !isAutoCompleting,
+                  !textView.hasMarkedText(),
+                  !textView.string.isEmpty else { return }
+
+            isAutoCompleting = true
+            textView.complete(nil)
+            isAutoCompleting = false
+        }
+
+        func textView(
+            _ textView: NSTextView,
             completions words: [String],
             forPartialWordRange charRange: NSRange,
-            indexOfSelectedItem index: UnsafeMutablePointer<Int>
+            indexOfSelectedItem index: UnsafeMutablePointer<Int>?
         ) -> [String] {
-            guard let autoCompleteSuggestions = parent.autoCompleteSuggestions else {
-                return []
-            }
-
             let typingWord = textView.string.substring(in: charRange)
             guard !typingWord.isEmpty else {
                 return []
             }
 
-            return autoCompleteSuggestions(typingWord)
+            return parent.autoCompleteSuggestions(typingWord)
         }
+    }
+}
+
+// MARK: - AppKit text view
+
+class TagNSTextView: NSTextView {
+    var placeholder: String = ""
+
+    private var textFont: NSFont {
+        font ?? .systemFont(ofSize: NSFont.systemFontSize)
+    }
+
+    override var intrinsicContentSize: NSSize {
+        let displayText = string.isEmpty ? placeholder : string
+        let textWidth = (displayText as NSString).size(
+            withAttributes: [.font: textFont]
+        ).width
+        let horizontalPadding = (textContainer?.lineFragmentPadding ?? 0) * 2
+        let textHeight = layoutManager?.defaultLineHeight(for: textFont) ?? 0
+        return NSSize(width: ceil(textWidth + horizontalPadding), height: ceil(textHeight))
+    }
+
+    override func layout() {
+        super.layout()
+
+        let textHeight = layoutManager?.defaultLineHeight(for: textFont) ?? 0
+        textContainerInset.height = max((bounds.height - textHeight) / 2, 0)
+    }
+
+    override func didChangeText() {
+        super.didChangeText()
+        invalidateIntrinsicContentSize()
+    }
+
+    override func draw(_ rect: CGRect) {
+        super.draw(rect)
+
+        guard string.isEmpty, !placeholder.isEmpty else { return }
+        let textOrigin = NSPoint(
+            x: textContainerInset.width + (textContainer?.lineFragmentPadding ?? 0),
+            y: textContainerInset.height
+        )
+        placeholder.draw(
+            at: textOrigin,
+            withAttributes: [
+                .font: textFont,
+                .foregroundColor: NSColor.placeholderTextColor
+            ]
+        )
     }
 }
