@@ -293,9 +293,7 @@ private struct TagTextField: NSViewRepresentable {
 
 // MARK: - AppKit text view
 
-class TagNSTextView: NSTextView {
-    var placeholder: String = ""
-
+private final class TagNSTextView: PlaceholderNSTextView {
     private var textFont: NSFont {
         font ?? .systemFont(ofSize: NSFont.systemFontSize)
     }
@@ -320,22 +318,5 @@ class TagNSTextView: NSTextView {
     override func didChangeText() {
         super.didChangeText()
         invalidateIntrinsicContentSize()
-    }
-
-    override func draw(_ rect: CGRect) {
-        super.draw(rect)
-
-        guard string.isEmpty, !placeholder.isEmpty else { return }
-        let textOrigin = NSPoint(
-            x: textContainerInset.width + (textContainer?.lineFragmentPadding ?? 0),
-            y: textContainerInset.height
-        )
-        placeholder.draw(
-            at: textOrigin,
-            withAttributes: [
-                .font: textFont,
-                .foregroundColor: NSColor.placeholderTextColor
-            ]
-        )
     }
 }

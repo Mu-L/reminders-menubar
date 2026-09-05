@@ -42,26 +42,26 @@ struct RmbHighlightedTextField: NSViewRepresentable {
     }
 
     func makeNSView(context: Context) -> NSScrollView {
-        let scrollView = PlaceholderNSTextView.scrollableTextView()
-        guard let textView = scrollView.documentView as? PlaceholderNSTextView else {
+        let scrollView = FocusAwareNSTextView.scrollableTextView()
+        guard let textView = scrollView.documentView as? FocusAwareNSTextView else {
             return scrollView
         }
 
         textView.placeholder = placeholder
         textView.shouldFocus = focusTrigger?.wrappedValue != nil
         textView.onDidBecomeFirstResponder = onDidBecomeFirstResponder
-        textView.isEditable = true
-        textView.isSelectable = true
-        textView.allowsUndo = true
-        textView.backgroundColor = .clear
         textView.font = textFont
+        textView.allowsUndo = true
+        textView.drawsBackground = false
+        textView.isRichText = false
+        textView.importsGraphics = false
         textView.delegate = context.coordinator
 
         return scrollView
     }
 
     func updateNSView(_ nsView: NSScrollView, context: Context) {
-        guard let textView = nsView.documentView as? PlaceholderNSTextView else {
+        guard let textView = nsView.documentView as? FocusAwareNSTextView else {
             return
         }
 
@@ -382,23 +382,9 @@ extension RmbHighlightedTextField {
 
 // MARK: - AppKit text view
 
-private class PlaceholderNSTextView: NSTextView {
-    var placeholder: String = ""
-    var shouldFocus: Bool = false
+private final class FocusAwareNSTextView: PlaceholderNSTextView {
+    var shouldFocus = false
     var onDidBecomeFirstResponder: ((NSTextView) -> Void)?
-
-    override func draw(_ rect: CGRect) {
-        super.draw(rect)
-
-        if string.isEmpty && !placeholder.isEmpty {
-            let attributes: [NSAttributedString.Key: Any] = [
-                .font: font ?? .systemFont(ofSize: NSFont.systemFontSize),
-                .foregroundColor: NSColor.secondaryLabelColor
-            ]
-
-            placeholder.draw(in: rect.insetBy(dx: 4, dy: 0), withAttributes: attributes)
-        }
-    }
 
     override func viewDidMoveToWindow() {
         if shouldFocus {
@@ -408,6 +394,8 @@ private class PlaceholderNSTextView: NSTextView {
 
     override func becomeFirstResponder() -> Bool {
         guard super.becomeFirstResponder() else { return false }
+        guard let onDidBecomeFirstResponder else { return true }
+
         // Let AppKit finish installing the field editor before replaying captured key events.
         DispatchQueue.main.async { [weak self] in
             guard let self, window?.firstResponder === self else { return }
@@ -417,7 +405,7 @@ private class PlaceholderNSTextView: NSTextView {
                 layoutManager.ensureLayout(for: textContainer)
             }
 
-            onDidBecomeFirstResponder?(self)
+            onDidBecomeFirstResponder(self)
         }
         return true
     }
