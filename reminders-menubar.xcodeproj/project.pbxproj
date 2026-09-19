@@ -1470,7 +1470,7 @@
 			repositoryURL = "https://github.com/sparkle-project/Sparkle";
 			requirement = {
 				kind = exactVersion;
-				version = 2.9.6;
+				version = 2.10.0;
 			};
 		};
 		716BCF0C28C97C7100537081 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */ = {
@@ -1478,7 +1478,7 @@
 			repositoryURL = "https://github.com/sindresorhus/KeyboardShortcuts";
 			requirement = {
 				kind = exactVersion;
-				version = 3.0.1;
+				version = 3.1.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
